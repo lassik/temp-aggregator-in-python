@@ -3,6 +3,7 @@
 
 import json
 import mimetypes
+import string
 import tarfile
 import os
 import re
@@ -10,11 +11,12 @@ import shutil
 import sys
 import urllib.request
 
-from collections import defaultdict
+from collections import defaultdict, namedtuple
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 from bs4 import BeautifulSoup  # pip3 install beautifulsoup4
 
+Symbol = namedtuple("Symbol", "name")
 
 CACHEDIR = os.path.join(os.path.dirname(__file__), ".cache")
 STATICDIR = os.path.join(os.path.dirname(__file__), "static")
@@ -35,6 +37,46 @@ def url_text(cachefile_basename, url):
     cachefile = url_cachefile(cachefile_basename, url)
     with open(cachefile, "r", encoding="utf-8") as input:
         return input.read()
+
+
+def replace_file_contents(filename, new_bytes):
+    newfilename = filename + ".new"
+    with open(newfilename, "wb") as output:
+        output.write(new_bytes)
+    os.rename(newfilename, filename)
+
+
+def to_lisp(obj, toplevel=False):
+    if isinstance(obj, list):
+        return (
+            "("
+            + ("\n" if toplevel else " ").join(map(to_lisp, obj))
+            + ")"
+            + ("\n" if toplevel else "")
+        )
+    if isinstance(obj, Symbol):
+        return obj.name
+    if isinstance(obj, str):
+        safe = string.ascii_letters + string.digits + " !#$%&'()*+,-./:;<=>?@[\]^_`{|}~"
+        for ch in obj:
+            if ch not in safe:
+                raise ValueError(
+                    "Char {} in string {} unsafe for Lisp".format(repr(ch), repr(obj))
+                )
+        return '"' + obj + '"'
+    if isinstance(obj, int):
+        return str(obj)
+    assert False
+
+
+def emit_lisp_file(filename, obj):
+    lisp = to_lisp(obj, True)
+    replace_file_contents(filename, lisp.encode("US-ASCII"))
+
+
+def emit_json_file(filename, obj):
+    json_ = json.dumps(obj, ensure_ascii=True, sort_keys=True, indent=4)
+    replace_file_contents(filename, json_.encode("US-ASCII"))
 
 
 def dict_with_sorted_values(items):
@@ -178,6 +220,26 @@ def srfi_map():
         }
         for srfi_number in all_srfi_numbers()
     }
+
+
+def emit_srfi():
+    the_map = srfi_map()
+    for srfi_number, info in the_map.items():
+        the_map[srfi_number]["symbols"] = []
+    for srfi_number, symbols in srfi_to_symbol_map().items():
+        the_map[srfi_number]["symbols"] = symbols
+    emit_json_file("srfi.json", the_map)
+    emit_lisp_file(
+        "srfi.lisp",
+        [
+            [
+                srfi_number,
+                [Symbol("title"), info["title"]],
+                [Symbol("symbols")] + info["symbols"],
+            ]
+            for srfi_number, info in the_map.items()
+        ],
+    )
 
 
 # ================================================================================
