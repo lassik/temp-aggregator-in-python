@@ -3,6 +3,7 @@
 
 import json
 import mimetypes
+import tarfile
 import os
 import re
 import shutil
@@ -45,6 +46,47 @@ def dict_with_sorted_values(items):
 
 def is_non_placeholder_symbol(s):
     return bool(re.match(r"^[a-z@*+/-][a-zA-Z0-9@?!<>*/+-]*", s))
+
+
+# ================================================================================
+
+
+def r4rs_tarfile():
+    return tarfile.open(
+        url_cachefile(
+            "r4rs.tar.gz",
+            "https://groups.csail.mit.edu/mac/ftpdir/scheme-reports/r4rs.tar.gz",
+        )
+    )
+
+
+def r5rs_tarfile():
+    return tarfile.open(
+        url_cachefile(
+            "r5rs.tar.gz",
+            "https://groups.csail.mit.edu/mac/ftpdir/scheme-reports/r5rs.tar.gz",
+        )
+    )
+
+
+def r6rs_tarfile():
+    return tarfile.open(
+        url_cachefile("r6rs.tar.gz", "http://www.r6rs.org/final/r6rs.tar.gz")
+    )
+
+
+def r4rs_symbols():
+    symbols = set()
+    tarfile = r4rs_tarfile()
+    for info in tarfile:
+        if info.name.endswith(".tex"):
+            tex_file = tarfile.extractfile(info).read().decode("US-ASCII")
+            for symbol in re.findall(r"{\\cf (.*?)}", tex_file):
+                symbols.add(symbol)
+    return symbols
+
+
+# ================================================================================
 
 
 def all_srfi_numbers():
