@@ -3,12 +3,13 @@
 
 import json
 import mimetypes
-import string
-import tarfile
 import os
 import re
 import shutil
+import string
 import sys
+import tarfile
+import urllib.parse
 import urllib.request
 
 from collections import defaultdict, namedtuple
@@ -21,8 +22,10 @@ Symbol = namedtuple("Symbol", "name")
 CACHEDIR = os.path.join(os.path.dirname(__file__), ".cache")
 
 
-def url_cachefile(cachefile_basename, url):
-    cachefile = os.path.join(CACHEDIR, cachefile_basename)
+def url_cachefile(url, basename=None):
+    basename = basename or os.path.basename(urllib.parse.urlparse(url).path)
+    assert len(basename)
+    cachefile = os.path.join(CACHEDIR, basename)
     os.makedirs(os.path.dirname(cachefile), exist_ok=True)
     if not os.path.exists(cachefile):
         print("Downloading", url, file=sys.stderr)
@@ -32,8 +35,8 @@ def url_cachefile(cachefile_basename, url):
     return cachefile
 
 
-def url_text(cachefile_basename, url):
-    cachefile = url_cachefile(cachefile_basename, url)
+def url_text(url, basename=None):
+    cachefile = url_cachefile(url, basename)
     with open(cachefile, "r", encoding="utf-8") as input:
         return input.read()
 
@@ -95,8 +98,7 @@ def is_non_placeholder_symbol(s):
 def r4rs_tarfile():
     return tarfile.open(
         url_cachefile(
-            "r4rs.tar.gz",
-            "https://groups.csail.mit.edu/mac/ftpdir/scheme-reports/r4rs.tar.gz",
+            "https://groups.csail.mit.edu/mac/ftpdir/scheme-reports/r4rs.tar.gz"
         )
     )
 
@@ -104,16 +106,13 @@ def r4rs_tarfile():
 def r5rs_tarfile():
     return tarfile.open(
         url_cachefile(
-            "r5rs.tar.gz",
-            "https://groups.csail.mit.edu/mac/ftpdir/scheme-reports/r5rs.tar.gz",
+            "https://groups.csail.mit.edu/mac/ftpdir/scheme-reports/r5rs.tar.gz"
         )
     )
 
 
 def r6rs_tarfile():
-    return tarfile.open(
-        url_cachefile("r6rs.tar.gz", "http://www.r6rs.org/final/r6rs.tar.gz")
-    )
+    return tarfile.open(url_cachefile("http://www.r6rs.org/final/r6rs.tar.gz"))
 
 
 def r4rs_symbols():
@@ -152,7 +151,7 @@ def srfi_github_html_url(srfi_number):
 
 
 def srfi_raw_html(srfi_number):
-    return url_text(srfi_cachefile(srfi_number), srfi_github_html_url(srfi_number))
+    return url_text(srfi_github_html_url(srfi_number), srfi_cachefile(srfi_number))
 
 
 def srfi_html_soup(srfi_number):
@@ -246,10 +245,7 @@ def emit_srfi():
 
 def impl_chibi_tarfile():
     return tarfile.open(
-        url_cachefile(
-            "chibi-scheme-0.8.0.tgz",
-            "http://synthcode.com/scheme/chibi/chibi-scheme-0.8.0.tgz",
-        )
+        url_cachefile("http://synthcode.com/scheme/chibi/chibi-scheme-0.8.0.tgz")
     )
 
 
