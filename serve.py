@@ -64,4 +64,4 @@ def serve_symbol(name):
 
 
 update_symbols_with_srfi(global_symbols)
-run(host="localhost", port=int(os.environ["PORT"]))
+run(port=int(os.environ["PORT"]))
