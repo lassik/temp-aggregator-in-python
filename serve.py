@@ -38,7 +38,7 @@ class DB:
             for srfi_number in impl["srfi_implemented"]:
                 self.srfi[str(srfi_number)]["implementations"].append(impl["id"])
 
-    def impl_by_id(impl_id):
+    def impl_by_id(self, impl_id):
         return next(impl for impl in self.impl if impl["id"] == impl_id)
 
 
