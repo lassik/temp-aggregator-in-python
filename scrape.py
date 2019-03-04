@@ -19,7 +19,6 @@ from bs4 import BeautifulSoup  # pip3 install beautifulsoup4
 Symbol = namedtuple("Symbol", "name")
 
 CACHEDIR = os.path.join(os.path.dirname(__file__), ".cache")
-STATICDIR = os.path.join(os.path.dirname(__file__), "static")
 
 
 def url_cachefile(cachefile_basename, url):
@@ -240,68 +239,3 @@ def emit_srfi():
             for srfi_number, info in the_map.items()
         ],
     )
-
-
-# ================================================================================
-
-
-def all_static_files():
-    ans = {}
-    for name in os.listdir(STATICDIR):
-        if not name.startswith("."):
-            full = os.path.join(STATICDIR, name)
-            if os.path.isfile(full):
-                ans["/static/" + name] = open(full, "rb").read()
-    for name in sorted(ans.keys()):
-        print("Static", name, file=sys.stderr)
-    return ans
-
-
-class WebApi(BaseHTTPRequestHandler):
-    def respond_with_error(self, status_code, status_text):
-        self.send_response(status_code)
-        self.send_header("Content-Type", "text/html; charset=US-ASCII")
-        self.end_headers()
-        self.wfile.write(status_text.encode("US-ASCII"))
-
-    def respond_with_json(self, obj):
-        self.send_response(200)
-        self.send_header("Content-Type", "application/json; charset=US-ASCII")
-        self.end_headers()
-        self.wfile.write(
-            json.dumps(obj, ensure_ascii=True, sort_keys=True, indent=4).encode(
-                "US-ASCII"
-            )
-        )
-
-    def respond_with_static(self, path, static):
-        mimetype, _ = mimetypes.guess_type(path)
-        self.send_response(200)
-        if mimetype:
-            self.send_header("Content-Type", mimetype)
-        self.end_headers()
-        self.wfile.write(static)
-
-    def do_GET(self):
-        routes = {
-            "/srfi-map.json": lambda: self.respond_with_json(srfi_map()),
-            "/symbol-to-srfi-map.json": lambda: self.respond_with_json(
-                symbol_to_srfi_map()
-            ),
-            "/srfi-to-symbol-map.json": lambda: self.respond_with_json(
-                srfi_to_symbol_map()
-            ),
-        }
-        route = routes.get(self.path, None)
-        if route:
-            route()
-            return
-        static = all_static_files().get(self.path, None)
-        if static:
-            self.respond_with_static(self.path, static)
-            return
-        self.respond_with_error(404, "Not Found")
-
-
-def serve_locally(port=8080):
-    HTTPServer(("localhost", port), WebApi).serve_forever()
