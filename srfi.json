@@ -1,4 +1,13 @@
 {
+    "0": {
+        "github_html_url": "https://raw.githubusercontent.com/scheme-requests-for-implementation/srfi-0/master/srfi-0.html",
+        "number": 0,
+        "official_html_url": "https://srfi.schemers.org/srfi-0/srfi-0.html",
+        "symbols": [
+            "feature-implemented?"
+        ],
+        "title": "Feature-based conditional expansion construct"
+    },
     "1": {
         "github_html_url": "https://raw.githubusercontent.com/scheme-requests-for-implementation/srfi-1/master/srfi-1.html",
         "number": 1,

@@ -134,8 +134,12 @@ def r4rs_symbols():
 # ================================================================================
 
 
+MIN_SRFI_NUMBER = 0
+MAX_SRFI_NUMBER = 165
+
+
 def all_srfi_numbers():
-    return [1 + i for i in range(165)]
+    return [i for i in range(MIN_SRFI_NUMBER, MAX_SRFI_NUMBER + 1)]
 
 
 def srfi_cachefile(srfi_number):
