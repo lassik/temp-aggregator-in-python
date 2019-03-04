@@ -4499,9 +4499,9 @@ var author$project$Main$Loading = {$: 'Loading'};
 var author$project$Main$GotSrfiList = function (a) {
 	return {$: 'GotSrfiList', a: a};
 };
-var author$project$Main$Srfi = F4(
-	function (number, title, officialHtmlUrl, symbols) {
-		return {number: number, officialHtmlUrl: officialHtmlUrl, symbols: symbols, title: title};
+var author$project$Main$Srfi = F5(
+	function (number, title, officialHtmlUrl, symbols, implementations) {
+		return {implementations: implementations, number: number, officialHtmlUrl: officialHtmlUrl, symbols: symbols, title: title};
 	});
 var elm$core$Array$branchFactor = 32;
 var elm$core$Array$Array_elm_builtin = F4(
@@ -4981,10 +4981,10 @@ var elm$json$Json$Decode$errorToStringHelp = F2(
 var elm$json$Json$Decode$field = _Json_decodeField;
 var elm$json$Json$Decode$int = _Json_decodeInt;
 var elm$json$Json$Decode$list = _Json_decodeList;
-var elm$json$Json$Decode$map4 = _Json_map4;
+var elm$json$Json$Decode$map5 = _Json_map5;
 var elm$json$Json$Decode$string = _Json_decodeString;
-var author$project$Main$srfiDecoder = A5(
-	elm$json$Json$Decode$map4,
+var author$project$Main$srfiDecoder = A6(
+	elm$json$Json$Decode$map5,
 	author$project$Main$Srfi,
 	A2(elm$json$Json$Decode$field, 'number', elm$json$Json$Decode$int),
 	A2(elm$json$Json$Decode$field, 'title', elm$json$Json$Decode$string),
@@ -4992,6 +4992,10 @@ var author$project$Main$srfiDecoder = A5(
 	A2(
 		elm$json$Json$Decode$field,
 		'symbols',
+		elm$json$Json$Decode$list(elm$json$Json$Decode$string)),
+	A2(
+		elm$json$Json$Decode$field,
+		'implementations',
 		elm$json$Json$Decode$list(elm$json$Json$Decode$string)));
 var author$project$Main$srfiListDecoder = A2(
 	elm$json$Json$Decode$field,
@@ -5962,6 +5966,13 @@ var elm$core$List$concatMap = F2(
 		return elm$core$List$concat(
 			A2(elm$core$List$map, f, list));
 	});
+var elm$core$List$isEmpty = function (xs) {
+	if (!xs.b) {
+		return true;
+	} else {
+		return false;
+	}
+};
 var elm$html$Html$a = _VirtualDom_node('a');
 var elm$html$Html$button = _VirtualDom_node('button');
 var elm$html$Html$div = _VirtualDom_node('div');
@@ -6073,6 +6084,24 @@ var author$project$Main$viewGif = function (model) {
 													[
 														elm$html$Html$text(srfi.title)
 													]))
+											]))
+									])),
+								A2(
+								elm$html$Html$tr,
+								_List_Nil,
+								_List_fromArray(
+									[
+										A2(
+										elm$html$Html$td,
+										_List_fromArray(
+											[
+												elm$html$Html$Attributes$colspan(2),
+												author$project$Main$tdStyle
+											]),
+										_List_fromArray(
+											[
+												elm$html$Html$text(
+												'Implementations: ' + (elm$core$List$isEmpty(srfi.implementations) ? '(unknown)' : A2(elm$core$String$join, ', ', srfi.implementations)))
 											]))
 									])),
 								A2(

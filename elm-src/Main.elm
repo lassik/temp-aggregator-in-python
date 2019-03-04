@@ -6,6 +6,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Http
 import Json.Decode as JD exposing (Decoder, field, int, list, string)
+import String
 
 
 main =
@@ -22,6 +23,7 @@ type alias Srfi =
     , title : String
     , officialHtmlUrl : String
     , symbols : List String
+    , implementations : List String
     }
 
 
@@ -95,6 +97,19 @@ viewGif model =
                             ]
                         , tr []
                             [ td [ colspan 2, tdStyle ]
+                                [ text
+                                    ("Implementations: "
+                                        ++ (if List.isEmpty srfi.implementations then
+                                                "(unknown)"
+
+                                            else
+                                                String.join ", " srfi.implementations
+                                           )
+                                    )
+                                ]
+                            ]
+                        , tr []
+                            [ td [ colspan 2, tdStyle ]
                                 [ ul [] (List.map (\symbol -> li [] [ text symbol ]) srfi.symbols)
                                 ]
                             ]
@@ -119,8 +134,9 @@ srfiListDecoder =
 
 srfiDecoder : Decoder Srfi
 srfiDecoder =
-    JD.map4 Srfi
+    JD.map5 Srfi
         (field "number" int)
         (field "title" string)
         (field "official_html_url" string)
         (field "symbols" (list string))
+        (field "implementations" (list string))
