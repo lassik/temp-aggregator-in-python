@@ -243,6 +243,11 @@ def emit_srfi():
 # ================================================================================
 
 
+def numbers_matching_regexp(regexp, items):
+    matches = filter(None, (re.match(regexp, item) for item in items))
+    return list(sorted(set(int(match.group(1)) for match in matches)))
+
+
 def impl_chibi_tarfile():
     return tarfile.open(
         url_cachefile("http://synthcode.com/scheme/chibi/chibi-scheme-0.8.0.tgz")
@@ -250,12 +255,10 @@ def impl_chibi_tarfile():
 
 
 def impl_chibi_srfi_list():
-    srfi_numbers = set()
-    for info in impl_chibi_tarfile():
-        match = re.match(r"^chibi-scheme-.*?/lib/srfi/(\d+).sld", info.name)
-        if match:
-            srfi_numbers.add(int(match.group(1)))
-    return list(sorted(srfi_numbers))
+    return numbers_matching_regexp(
+        r"chibi-scheme-.*?/lib/srfi/(\d+).sld",
+        (entry.name for entry in impl_chibi_tarfile()),
+    )
 
 
 def impl_chibi():
@@ -267,5 +270,28 @@ def impl_chibi():
     }
 
 
+def impl_guile_tarfile():
+    return tarfile.open(
+        url_cachefile("https://ftp.gnu.org/gnu/guile/guile-2.2.4.tar.gz")
+    )
+
+
+def impl_guile_srfi_list():
+    # Some SRFI implementations are single files, others are directories.
+    return numbers_matching_regexp(
+        r"guile-.*?/module/srfi/srfi-(\d+)",
+        (entry.name for entry in impl_guile_tarfile()),
+    )
+
+
+def impl_guile():
+    return {
+        "id": "guile",
+        "title": "Guile",
+        "homepage_url": "https://www.gnu.org/software/guile/",
+        "srfi_implemented": impl_guile_srfi_list(),
+    }
+
+
 def emit_implementation():
-    emit_json_file("implementation.json", [impl_chibi()])
+    emit_json_file("implementation.json", [impl_chibi(), impl_guile()])
