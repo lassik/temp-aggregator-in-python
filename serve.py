@@ -5,7 +5,7 @@ import os
 
 from os.path import join
 
-from bottle import abort, route, run, static_file, template
+from bottle import abort, route, run, static_file
 
 
 ROOT = os.path.dirname(__file__)
@@ -30,11 +30,6 @@ def update_symbols_with_srfi(symbols):
 @route("/")
 def serve_main():
     return static_file("index.html", root=join(ROOT))
-
-
-@route("/static/<filename>")
-def serve_static(filename):
-    return static_file(filename, root=STATICDIR)
 
 
 @route("/unstable/srfi")
