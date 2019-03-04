@@ -119,8 +119,17 @@ view model =
 
 viewTab contents =
     div []
-        [ button [ onClick (SwitchToTab SrfiTab) ] [ text "SRFIs" ]
-        , button [ onClick (SwitchToTab ImplTab) ] [ text "Implementations" ]
+        [ p []
+            [ a [ href "https://github.com/lassik/schemedoc" ]
+                [ text "Source on GitHub" ]
+            ]
+        , hr [] []
+        , p []
+            [ button [ onClick (SwitchToTab SrfiTab) ]
+                [ text "SRFIs" ]
+            , button [ onClick (SwitchToTab ImplTab) ]
+                [ text "Implementations" ]
+            ]
         , contents
         ]
 

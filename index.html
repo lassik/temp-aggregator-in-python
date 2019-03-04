@@ -6189,6 +6189,8 @@ var author$project$Main$SwitchToTab = function (a) {
 };
 var elm$html$Html$button = _VirtualDom_node('button');
 var elm$html$Html$div = _VirtualDom_node('div');
+var elm$html$Html$hr = _VirtualDom_node('hr');
+var elm$html$Html$p = _VirtualDom_node('p');
 var elm$virtual_dom$VirtualDom$Normal = function (a) {
 	return {$: 'Normal', a: a};
 };
@@ -6213,26 +6215,49 @@ var author$project$Main$viewTab = function (contents) {
 		_List_fromArray(
 			[
 				A2(
-				elm$html$Html$button,
+				elm$html$Html$p,
+				_List_Nil,
 				_List_fromArray(
 					[
-						elm$html$Html$Events$onClick(
-						author$project$Main$SwitchToTab(author$project$Main$SrfiTab))
-					]),
-				_List_fromArray(
-					[
-						elm$html$Html$text('SRFIs')
+						A2(
+						elm$html$Html$a,
+						_List_fromArray(
+							[
+								elm$html$Html$Attributes$href('https://github.com/lassik/schemedoc')
+							]),
+						_List_fromArray(
+							[
+								elm$html$Html$text('Source on GitHub')
+							]))
 					])),
+				A2(elm$html$Html$hr, _List_Nil, _List_Nil),
 				A2(
-				elm$html$Html$button,
+				elm$html$Html$p,
+				_List_Nil,
 				_List_fromArray(
 					[
-						elm$html$Html$Events$onClick(
-						author$project$Main$SwitchToTab(author$project$Main$ImplTab))
-					]),
-				_List_fromArray(
-					[
-						elm$html$Html$text('Implementations')
+						A2(
+						elm$html$Html$button,
+						_List_fromArray(
+							[
+								elm$html$Html$Events$onClick(
+								author$project$Main$SwitchToTab(author$project$Main$SrfiTab))
+							]),
+						_List_fromArray(
+							[
+								elm$html$Html$text('SRFIs')
+							])),
+						A2(
+						elm$html$Html$button,
+						_List_fromArray(
+							[
+								elm$html$Html$Events$onClick(
+								author$project$Main$SwitchToTab(author$project$Main$ImplTab))
+							]),
+						_List_fromArray(
+							[
+								elm$html$Html$text('Implementations')
+							]))
 					])),
 				contents
 			]));
