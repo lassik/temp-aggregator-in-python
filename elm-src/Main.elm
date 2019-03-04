@@ -1,4 +1,4 @@
-module Main exposing (Model(..), Msg(..), getSrfiList, init, main, srfiListDecoder, subscriptions, update, view, viewGif)
+module Main exposing (main)
 
 import Browser
 import Html exposing (..)
@@ -27,35 +27,70 @@ type alias Srfi =
     }
 
 
-type Model
-    = Failure
-    | Loading
-    | Success (List Srfi)
+type alias Implementation =
+    { id : String
+    , title : String
+    , homepageUrl : String
+    }
+
+
+type Tab
+    = Loading
+    | Failure
+    | SrfiTab
+    | ImplTab
+
+
+type alias Model =
+    { tab : Tab, srfiList : List Srfi, implList : List Implementation }
 
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( Loading, getSrfiList )
+    ( { tab = Loading, srfiList = [], implList = [] }
+    , Cmd.batch [ getSrfiList, getImplList ]
+    )
 
 
 type Msg
-    = MorePlease
+    = SwitchToTab Tab
     | GotSrfiList (Result Http.Error (List Srfi))
+    | GotImplList (Result Http.Error (List Implementation))
+
+
+initialTab =
+    SrfiTab
+
+
+allLoaded model =
+    if List.isEmpty model.srfiList || List.isEmpty model.implList then
+        model
+
+    else
+        { model | tab = initialTab }
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        MorePlease ->
-            ( Loading, getSrfiList )
+        SwitchToTab tab ->
+            ( { model | tab = tab }, Cmd.none )
 
         GotSrfiList result ->
             case result of
-                Ok url ->
-                    ( Success url, Cmd.none )
+                Ok srfiList ->
+                    ( allLoaded { model | srfiList = srfiList }, Cmd.none )
 
                 Err _ ->
-                    ( Failure, Cmd.none )
+                    ( { model | tab = Failure }, Cmd.none )
+
+        GotImplList result ->
+            case result of
+                Ok implList ->
+                    ( allLoaded { model | implList = implList }, Cmd.none )
+
+                Err _ ->
+                    ( { model | tab = Failure }, Cmd.none )
 
 
 subscriptions : Model -> Sub Msg
@@ -67,7 +102,26 @@ view : Model -> Html Msg
 view model =
     div [ style "font-family" "sans-serif" ]
         [ h2 [] [ text "Scheme documentation browser" ]
-        , viewGif model
+        , case model.tab of
+            Loading ->
+                text "Loading..."
+
+            Failure ->
+                text "Error loading documentation data from API"
+
+            SrfiTab ->
+                viewTab (viewSrfiTab model.srfiList)
+
+            ImplTab ->
+                viewTab (viewImplTab model.implList)
+        ]
+
+
+viewTab contents =
+    div []
+        [ button [ onClick (SwitchToTab SrfiTab) ] [ text "SRFIs" ]
+        , button [ onClick (SwitchToTab ImplTab) ] [ text "Implementations" ]
+        , contents
         ]
 
 
@@ -75,48 +129,49 @@ tdStyle =
     style "border" "1px solid black"
 
 
-viewGif : Model -> Html Msg
-viewGif model =
-    case model of
-        Failure ->
-            div []
-                [ text "Error loading documentation data from API"
-                , button [ onClick MorePlease ] [ text "Try Again!" ]
-                ]
+viewSrfiTab srfiList =
+    table [ tdStyle ]
+        (List.concatMap
+            (\srfi ->
+                [ tr []
+                    [ th [ tdStyle ] [ text ("SRFI " ++ String.fromInt srfi.number) ]
+                    , th [ tdStyle ] [ a [ href srfi.officialHtmlUrl ] [ text srfi.title ] ]
+                    ]
+                , tr []
+                    [ td [ colspan 2, tdStyle ]
+                        [ text
+                            ("Implementations: "
+                                ++ (if List.isEmpty srfi.implementations then
+                                        "(unknown)"
 
-        Loading ->
-            text "Loading..."
-
-        Success srfiList ->
-            table [ tdStyle ]
-                (List.concatMap
-                    (\srfi ->
-                        [ tr []
-                            [ th [ tdStyle ] [ text ("SRFI " ++ String.fromInt srfi.number) ]
-                            , th [ tdStyle ] [ a [ href srfi.officialHtmlUrl ] [ text srfi.title ] ]
-                            ]
-                        , tr []
-                            [ td [ colspan 2, tdStyle ]
-                                [ text
-                                    ("Implementations: "
-                                        ++ (if List.isEmpty srfi.implementations then
-                                                "(unknown)"
-
-                                            else
-                                                String.join ", " srfi.implementations
-                                           )
-                                    )
-                                ]
-                            ]
-                        , tr []
-                            [ td [ colspan 2, tdStyle ]
-                                [ ul [] (List.map (\symbol -> li [] [ text symbol ]) srfi.symbols)
-                                ]
-                            ]
+                                    else
+                                        String.join ", " srfi.implementations
+                                   )
+                            )
                         ]
-                    )
-                    srfiList
-                )
+                    ]
+                , tr []
+                    [ td [ colspan 2, tdStyle ]
+                        [ ul [] (List.map (\symbol -> li [] [ text symbol ]) srfi.symbols)
+                        ]
+                    ]
+                ]
+            )
+            srfiList
+        )
+
+
+viewImplTab implList =
+    ul []
+        (List.map
+            (\impl ->
+                li []
+                    [ a [ href impl.homepageUrl ]
+                        [ text impl.title ]
+                    ]
+            )
+            implList
+        )
 
 
 getSrfiList : Cmd Msg
@@ -140,3 +195,24 @@ srfiDecoder =
         (field "official_html_url" string)
         (field "symbols" (list string))
         (field "implementations" (list string))
+
+
+getImplList : Cmd Msg
+getImplList =
+    Http.get
+        { url = "/unstable/implementation"
+        , expect = Http.expectJson GotImplList implListDecoder
+        }
+
+
+implListDecoder : Decoder (List Implementation)
+implListDecoder =
+    field "data" (list implDecoder)
+
+
+implDecoder : Decoder Implementation
+implDecoder =
+    JD.map3 Implementation
+        (field "id" string)
+        (field "title" string)
+        (field "homepage_url" string)
