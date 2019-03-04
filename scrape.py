@@ -88,6 +88,11 @@ def dict_with_sorted_values(items):
     return dict_
 
 
+def numbers_matching_regexp(regexp, items):
+    matches = filter(None, (re.match(regexp, item) for item in items))
+    return list(sorted(set(int(match.group(1)) for match in matches)))
+
+
 def is_non_placeholder_symbol(s):
     return bool(re.match(r"^[a-z@*+/-][a-zA-Z0-9@?!<>*/+-]*", s))
 
@@ -241,11 +246,6 @@ def emit_srfi():
 
 
 # ================================================================================
-
-
-def numbers_matching_regexp(regexp, items):
-    matches = filter(None, (re.match(regexp, item) for item in items))
-    return list(sorted(set(int(match.group(1)) for match in matches)))
 
 
 def impl_chibi_tarfile():
