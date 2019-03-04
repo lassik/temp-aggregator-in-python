@@ -239,3 +239,37 @@ def emit_srfi():
             for srfi_number, info in the_map.items()
         ],
     )
+
+
+# ================================================================================
+
+
+def impl_chibi_tarfile():
+    return tarfile.open(
+        url_cachefile(
+            "chibi-scheme-0.8.0.tgz",
+            "http://synthcode.com/scheme/chibi/chibi-scheme-0.8.0.tgz",
+        )
+    )
+
+
+def impl_chibi_srfi_list():
+    srfi_numbers = set()
+    for info in impl_chibi_tarfile():
+        match = re.match(r"^chibi-scheme-.*?/lib/srfi/(\d+).sld", info.name)
+        if match:
+            srfi_numbers.add(int(match.group(1)))
+    return list(sorted(srfi_numbers))
+
+
+def impl_chibi():
+    return {
+        "id": "chibi",
+        "title": "Chibi-Scheme",
+        "homepage_url": "http://synthcode.com/wiki/chibi-scheme",
+        "srfi_implemented": impl_chibi_srfi_list(),
+    }
+
+
+def emit_implementation():
+    emit_json_file("implementation.json", [impl_chibi()])
