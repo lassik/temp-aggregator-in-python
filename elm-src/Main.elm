@@ -120,7 +120,10 @@ view model =
 viewTab contents =
     div []
         [ p []
-            [ a [ href "https://github.com/lassik/schemedoc" ]
+            [ a
+                [ href "https://github.com/lassik/schemedoc"
+                , target "_blank"
+                ]
                 [ text "Source on GitHub" ]
             ]
         , hr [] []
@@ -144,7 +147,13 @@ viewSrfiTab srfiList =
             (\srfi ->
                 [ tr []
                     [ th [ tdStyle ] [ text ("SRFI " ++ String.fromInt srfi.number) ]
-                    , th [ tdStyle ] [ a [ href srfi.officialHtmlUrl ] [ text srfi.title ] ]
+                    , th [ tdStyle ]
+                        [ a
+                            [ href srfi.officialHtmlUrl
+                            , target "_blank"
+                            ]
+                            [ text srfi.title ]
+                        ]
                     ]
                 , tr []
                     [ td [ colspan 2, tdStyle ]
@@ -175,7 +184,7 @@ viewImplTab implList =
         (List.map
             (\impl ->
                 li []
-                    [ a [ href impl.homepageUrl ]
+                    [ a [ href impl.homepageUrl, target "_blank" ]
                         [ text impl.title ]
                     ]
             )
