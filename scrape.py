@@ -135,7 +135,7 @@ def r4rs_symbols():
 
 
 MIN_SRFI_NUMBER = 0
-MAX_SRFI_NUMBER = 165
+MAX_SRFI_NUMBER = 185
 
 
 def all_srfi_numbers():
