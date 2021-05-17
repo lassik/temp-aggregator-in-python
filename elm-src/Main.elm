@@ -202,7 +202,7 @@ getSrfiList =
 
 srfiListDecoder : Decoder (List Srfi)
 srfiListDecoder =
-    field "data" (list srfiDecoder)
+    field "data" (JD.list srfiDecoder)
 
 
 srfiDecoder : Decoder Srfi
@@ -211,8 +211,8 @@ srfiDecoder =
         (field "number" int)
         (field "title" string)
         (field "official_html_url" string)
-        (field "symbols" (list string))
-        (field "implementations" (list string))
+        (field "symbols" (JD.list string))
+        (field "implementations" (JD.list string))
 
 
 getImplList : Cmd Msg
@@ -225,7 +225,7 @@ getImplList =
 
 implListDecoder : Decoder (List Implementation)
 implListDecoder =
-    field "data" (list implDecoder)
+    field "data" (JD.list implDecoder)
 
 
 implDecoder : Decoder Implementation

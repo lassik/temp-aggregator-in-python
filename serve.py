@@ -50,6 +50,11 @@ def serve_main():
     return static_file("index.html", root=join(ROOT))
 
 
+@route("/elm.min.js")
+def serve_main():
+    return static_file("elm.min.js", root=join(ROOT))
+
+
 @route("/unstable/srfi")
 def serve_srfi():
     return {"data": list(sorted(db.srfi.values(), key=lambda srfi: srfi["number"]))}
